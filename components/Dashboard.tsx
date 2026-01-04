@@ -1,28 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Package, DollarSign, TrendingUp, Activity, RefreshCw } from 'lucide-react';
+import { getMarketplaceStats, MarketplaceStats } from '../services/arbiService';
 
-interface MarketplaceStats {
-  totalProducts: number;
-  potentialRevenue: number;
-  potentialProfit: number;
-  avgMargin: number;
+interface DashboardStats extends MarketplaceStats {
   lastUpdated: string;
 }
 
-interface Listing {
-  retailPrice?: number;
-  resalePrice?: number;
-  profit?: number;
-  [key: string]: any;
-}
-
-interface ApiResponse {
-  listings: Listing[];
-  [key: string]: any;
-}
-
 export const Dashboard: React.FC = () => {
-  const [stats, setStats] = useState<MarketplaceStats | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,32 +16,10 @@ export const Dashboard: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('/api/marketplace');
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-      
-      const data: ApiResponse = await response.json();
-      
-      // Calculate totals from listings
-      const totalRevenue = data.listings.reduce((sum, item) => 
-        sum + (item.resalePrice || 0), 0
-      );
-      
-      const totalProfit = data.listings.reduce((sum, item) => 
-        sum + (item.profit || 0), 0
-      );
-      
-      const avgMargin = totalRevenue > 0 
-        ? (totalProfit / totalRevenue) * 100 
-        : 0;
+      const marketplaceStats = await getMarketplaceStats();
       
       setStats({
-        totalProducts: data.listings.length,
-        potentialRevenue: totalRevenue,
-        potentialProfit: totalProfit,
-        avgMargin,
+        ...marketplaceStats,
         lastUpdated: new Date().toLocaleTimeString()
       });
       
@@ -139,9 +102,12 @@ export const Dashboard: React.FC = () => {
             <div className="text-xs font-mono text-slate-500 uppercase">Live Count</div>
           </div>
           <div className="text-4xl font-bold text-white font-mono mb-1">
-            {stats?.totalProducts.toLocaleString() || '0'}
+            {stats?.totalListings.toLocaleString() || '0'}
           </div>
-          <div className="text-sm text-slate-400">Total Products</div>
+          <div className="text-sm text-slate-400">Total Listings</div>
+          <div className="text-xs text-slate-500 mt-2">
+            Active: {stats?.activeListings.toLocaleString() || '0'}
+          </div>
         </div>
 
         {/* Potential Revenue */}
@@ -150,7 +116,7 @@ export const Dashboard: React.FC = () => {
             <div className="p-3 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
               <DollarSign size={24} />
             </div>
-            <div className="text-xs font-mono text-slate-500 uppercase">Revenue</div>
+            <div classtotalPame="text-xs font-mono text-slate-500 uppercase">Revenue</div>
           </div>
           <div className="text-4xl font-bold text-white font-mono mb-1">
             ${(stats?.potentialRevenue || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -164,7 +130,7 @@ export const Dashboard: React.FC = () => {
             <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <TrendingUp size={24} />
             </div>
-            <div className="text-xs font-mono text-slate-500 uppercase">Profit</div>
+            <div classtotalPame="text-xs font-mono text-slate-500 uppercase">Profit</div>
           </div>
           <div className="text-4xl font-bold text-emerald-400 font-mono mb-1">
             ${(stats?.potentialProfit || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
@@ -178,7 +144,7 @@ export const Dashboard: React.FC = () => {
             <div className="p-3 rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">
               <Activity size={24} />
             </div>
-            <div className="text-xs font-mono text-slate-500 uppercase">Margin</div>
+            ${(stats?.averageMargin || 0).toFixed(2)}t-slate-500 uppercase">Margin</div>
           </div>
           <div className="text-4xl font-bold text-white font-mono mb-1">
             {(stats?.avgMargin || 0).toFixed(1)}%
