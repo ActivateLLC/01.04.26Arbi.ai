@@ -4,13 +4,15 @@ import { PipelineVisualizer } from './components/PipelineVisualizer';
 import { TerminalLog } from './components/TerminalLog';
 import { RevenueChart } from './components/RevenueChart';
 import { Dashboard } from './components/Dashboard';
+import { MarketplaceStats } from './components/MarketplaceStats';
 import { SystemStatus, LogEntry, ChartDataPoint, PipelineStage } from './types';
 import { generateSystemLogs } from './services/geminiService';
-import { LayoutGrid, Settings, Wallet, Bell, Menu } from 'lucide-react';
+import { LayoutGrid, Settings, Wallet, Bell, Menu, Package } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const App: React.FC = () => {
   // --- State ---
+  const [activeTab, setActiveTab] = useState<'simulation' | 'marketplace'>('simulation');
   const [status, setStatus] = useState<SystemStatus>(SystemStatus.IDLE);
   const [dailySpend, setDailySpend] = useState<number>(500);
   const [riskTolerance, setRiskTolerance] = useState<number>(35);
@@ -105,16 +107,29 @@ const App: React.FC = () => {
       {/* Sidebar (Desktop) */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-white/5 bg-slate-950/50 backdrop-blur-xl fixed h-full z-20">
         <div className="p-6 border-b border-white/5">
-          <div className="flex items-center gap-2 text-white font-bold text-xl tracking-tight">
-             <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-slate-950">
-               <LayoutGrid size={20} />
-             </div>
+          <div className="flex items-center gap-3 text-white font-bold text-xl tracking-tight">
+             <img 
+               src="/components/Arbi_Logo-removebg-preview (1).png" 
+               alt="Arbi.ai Logo" 
+               className="w-10 h-10 object-contain"
+             />
              Arbi<span className="text-emerald-500">.ai</span>
           </div>
         </div>
         
         <nav className="flex-1 p-4 space-y-2">
-          <NavItem icon={<LayoutGrid size={18} />} label="Dashboard" active />
+          <NavItem 
+            icon={<LayoutGrid size={18} />} 
+            label="Simulation" 
+            active={activeTab === 'simulation'}
+            onClick={() => setActiveTab('simulation')}
+          />
+          <NavItem 
+            icon={<Package size={18} />} 
+            label="Marketplace" 
+            active={activeTab === 'marketplace'}
+            onClick={() => setActiveTab('marketplace')}
+          />
           <NavItem icon={<Wallet size={18} />} label="Wallet" />
           <NavItem icon={<Bell size={18} />} label="Alerts" count={3} />
           <NavItem icon={<Settings size={18} />} label="Settings" />
@@ -138,20 +153,19 @@ const App: React.FC = () => {
         {/* Header (Mobile) */}
         <header className="lg:hidden flex justify-between items-center mb-6">
            <div className="flex items-center gap-2 text-white font-bold text-lg">
-             <div className="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center text-slate-950">
-               <LayoutGrid size={14} />
-             </div>
+             <img 
+               src="/components/Arbi_Logo-removebg-preview (1).png" 
+               alt="Arbi.ai Logo" 
+               className="w-8 h-8 object-contain"
+             />
              Arbi.ai
           </div>
           <Menu className="text-slate-400" />
         </header>
 
-        {/* Live Marketplace Dashboard */}
-        <div className="mb-8">
-          <Dashboard />
-        </div>
-
-        {/* Top Area: Controls & Live Stats */}
+        {activeTab === 'simulation' ? (
+          <>
+            {/* Top Area: Controls & Live Stats */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
           <div className="xl:col-span-2">
              <ControlPanel 
@@ -196,6 +210,18 @@ const App: React.FC = () => {
              <TerminalLog logs={logs} />
           </div>
         </div>
+          </>
+        ) : (
+          <>
+            {/* Real Marketplace Data */}
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-white mb-2">Live Marketplace</h1>
+              <p className="text-slate-400">Real-time data from your Arbi marketplace</p>
+            </div>
+            
+            <MarketplaceStats />
+          </>
+        )}
 
       </main>
     </div>
@@ -203,8 +229,16 @@ const App: React.FC = () => {
 };
 
 // Simple Nav Helper
-const NavItem: React.FC<{ icon: React.ReactNode, label: string, active?: boolean, count?: number }> = ({ icon, label, active, count }) => (
-  <button className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
+const NavItem: React.FC<{ 
+  icon: React.ReactNode, 
+  label: string, 
+  active?: boolean, 
+  count?: number,
+  onClick?: () => void 
+}> = ({ icon, label, active, count, onClick }) => (
+  <button 
+    onClick={onClick}
+    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
     active 
       ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
       : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
