@@ -3,6 +3,7 @@ import { ControlPanel } from './components/ControlPanel';
 import { PipelineVisualizer } from './components/PipelineVisualizer';
 import { TerminalLog } from './components/TerminalLog';
 import { RevenueChart } from './components/RevenueChart';
+import { Dashboard } from './components/Dashboard';
 import { SystemStatus, LogEntry, ChartDataPoint, PipelineStage } from './types';
 import { generateSystemLogs } from './services/geminiService';
 import { LayoutGrid, Settings, Wallet, Bell, Menu } from 'lucide-react';
@@ -144,6 +145,11 @@ const App: React.FC = () => {
           </div>
           <Menu className="text-slate-400" />
         </header>
+
+        {/* Live Marketplace Dashboard */}
+        <div className="mb-8">
+          <Dashboard />
+        </div>
 
         {/* Top Area: Controls & Live Stats */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
