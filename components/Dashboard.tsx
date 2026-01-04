@@ -31,7 +31,7 @@ export const Dashboard: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch('https://api.arbi.creai.dev/api/marketplace');
+      const response = await fetch('/api/marketplace');
       
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
