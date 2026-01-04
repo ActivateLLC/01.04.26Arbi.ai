@@ -130,10 +130,10 @@ export const Dashboard: React.FC = () => {
             <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <TrendingUp size={24} />
             </div>
-            <div classtotalPame="text-xs font-mono text-slate-500 uppercase">Profit</div>
+            <div className="text-xs font-mono text-slate-500 uppercase">Profit</div>
           </div>
           <div className="text-4xl font-bold text-emerald-400 font-mono mb-1">
-            ${(stats?.potentialProfit || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            ${(stats?.totalPotentialProfit || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
           <div className="text-sm text-slate-400">Potential Profit</div>
         </div>
@@ -144,10 +144,10 @@ export const Dashboard: React.FC = () => {
             <div className="p-3 rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">
               <Activity size={24} />
             </div>
-            ${(stats?.averageMargin || 0).toFixed(2)}t-slate-500 uppercase">Margin</div>
+            <div className="text-xs font-mono text-slate-500 uppercase">Margin</div>
           </div>
           <div className="text-4xl font-bold text-white font-mono mb-1">
-            {(stats?.avgMargin || 0).toFixed(1)}%
+            ${(stats?.averageMargin || 0).toFixed(2)}
           </div>
           <div className="text-sm text-slate-400">Average Margin</div>
         </div>
