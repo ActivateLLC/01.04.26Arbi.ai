@@ -5,14 +5,15 @@ import { TerminalLog } from './components/TerminalLog';
 import { RevenueChart } from './components/RevenueChart';
 import { Dashboard } from './components/Dashboard';
 import { MarketplaceStats } from './components/MarketplaceStats';
+import { Opportunities } from './components/Opportunities';
 import { SystemStatus, LogEntry, ChartDataPoint, PipelineStage } from './types';
 import { generateSystemLogs } from './services/geminiService';
-import { LayoutGrid, Settings, Wallet, Bell, Menu, Package } from 'lucide-react';
+import { LayoutGrid, Settings, Wallet, Bell, Menu, Package, Search } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const App: React.FC = () => {
   // --- State ---
-  const [activeTab, setActiveTab] = useState<'simulation' | 'marketplace'>('simulation');
+  const [activeTab, setActiveTab] = useState<'simulation' | 'opportunities' | 'marketplace'>('simulation');
   const [status, setStatus] = useState<SystemStatus>(SystemStatus.IDLE);
   const [dailySpend, setDailySpend] = useState<number>(500);
   const [riskTolerance, setRiskTolerance] = useState<number>(35);
@@ -118,15 +119,21 @@ const App: React.FC = () => {
         </div>
         
         <nav className="flex-1 p-4 space-y-2">
-          <NavItem 
-            icon={<LayoutGrid size={18} />} 
-            label="Simulation" 
+          <NavItem
+            icon={<LayoutGrid size={18} />}
+            label="Simulation"
             active={activeTab === 'simulation'}
             onClick={() => setActiveTab('simulation')}
           />
-          <NavItem 
-            icon={<Package size={18} />} 
-            label="Marketplace" 
+          <NavItem
+            icon={<Search size={18} />}
+            label="Opportunities"
+            active={activeTab === 'opportunities'}
+            onClick={() => setActiveTab('opportunities')}
+          />
+          <NavItem
+            icon={<Package size={18} />}
+            label="Marketplace"
             active={activeTab === 'marketplace'}
             onClick={() => setActiveTab('marketplace')}
           />
@@ -166,7 +173,7 @@ const App: React.FC = () => {
         {activeTab === 'simulation' ? (
           <>
             {/* Top Area: Controls & Live Stats */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
           <div className="xl:col-span-2">
              <ControlPanel 
                status={status}
@@ -211,6 +218,11 @@ const App: React.FC = () => {
           </div>
         </div>
           </>
+        ) : activeTab === 'opportunities' ? (
+          <>
+            {/* Opportunities Tab */}
+            <Opportunities />
+          </>
         ) : (
           <>
             {/* Real Marketplace Data */}
@@ -218,7 +230,7 @@ const App: React.FC = () => {
               <h1 className="text-3xl font-bold text-white mb-2">Live Marketplace</h1>
               <p className="text-slate-400">Real-time data from your Arbi marketplace</p>
             </div>
-            
+
             <MarketplaceStats />
           </>
         )}
