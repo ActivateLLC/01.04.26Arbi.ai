@@ -6,6 +6,9 @@ import { RevenueChart } from './components/RevenueChart';
 import { Dashboard } from './components/Dashboard';
 import { MarketplaceStats } from './components/MarketplaceStats';
 import { Opportunities } from './components/Opportunities';
+import { Wallet as WalletComponent } from './components/Wallet';
+import { Alerts } from './components/Alerts';
+import { Settings as SettingsComponent } from './components/Settings';
 import { SystemStatus, LogEntry, ChartDataPoint, PipelineStage } from './types';
 import { generateSystemLogs } from './services/geminiService';
 import { LayoutGrid, Settings, Wallet, Bell, Menu, Package, Search } from 'lucide-react';
@@ -13,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const App: React.FC = () => {
   // --- State ---
-  const [activeTab, setActiveTab] = useState<'simulation' | 'opportunities' | 'marketplace'>('simulation');
+  const [activeTab, setActiveTab] = useState<'simulation' | 'opportunities' | 'marketplace' | 'wallet' | 'alerts' | 'settings'>('simulation');
   const [status, setStatus] = useState<SystemStatus>(SystemStatus.IDLE);
   const [dailySpend, setDailySpend] = useState<number>(500);
   const [riskTolerance, setRiskTolerance] = useState<number>(35);
@@ -137,9 +140,25 @@ const App: React.FC = () => {
             active={activeTab === 'marketplace'}
             onClick={() => setActiveTab('marketplace')}
           />
-          <NavItem icon={<Wallet size={18} />} label="Wallet" />
-          <NavItem icon={<Bell size={18} />} label="Alerts" count={3} />
-          <NavItem icon={<Settings size={18} />} label="Settings" />
+          <NavItem
+            icon={<Wallet size={18} />}
+            label="Wallet"
+            active={activeTab === 'wallet'}
+            onClick={() => setActiveTab('wallet')}
+          />
+          <NavItem
+            icon={<Bell size={18} />}
+            label="Alerts"
+            count={3}
+            active={activeTab === 'alerts'}
+            onClick={() => setActiveTab('alerts')}
+          />
+          <NavItem
+            icon={<Settings size={18} />}
+            label="Settings"
+            active={activeTab === 'settings'}
+            onClick={() => setActiveTab('settings')}
+          />
         </nav>
 
         <div className="p-4 border-t border-white/5">
@@ -223,7 +242,7 @@ const App: React.FC = () => {
             {/* Opportunities Tab */}
             <Opportunities />
           </>
-        ) : (
+        ) : activeTab === 'marketplace' ? (
           <>
             {/* Real Marketplace Data */}
             <div className="mb-6">
@@ -233,7 +252,22 @@ const App: React.FC = () => {
 
             <MarketplaceStats />
           </>
-        )}
+        ) : activeTab === 'wallet' ? (
+          <>
+            {/* Wallet Tab */}
+            <WalletComponent />
+          </>
+        ) : activeTab === 'alerts' ? (
+          <>
+            {/* Alerts Tab */}
+            <Alerts />
+          </>
+        ) : activeTab === 'settings' ? (
+          <>
+            {/* Settings Tab */}
+            <SettingsComponent />
+          </>
+        ) : null}
 
       </main>
     </div>
