@@ -3,6 +3,8 @@
  * Fetches real data from your marketplace backend
  */
 
+import { ArbitrageOpportunity } from '../types';
+
 export interface ArbiListing {
   listingId: string;
   productTitle: string;
@@ -98,15 +100,105 @@ export const scrapeProductImages = async (listingId: string): Promise<{ success:
     const response = await fetch(`/api/scrape-rainforest/${listingId}`, {
       method: 'POST',
     });
-    
+
     const data = await response.json();
     return {
       success: data.success,
       images: data.images,
     };
-    
+
   } catch (error) {
     console.error('Failed to scrape images:', error);
+    return { success: false };
+  }
+};
+
+/**
+ * Fetch arbitrage opportunities
+ */
+export const getArbitrageOpportunities = async (): Promise<ArbitrageOpportunity[]> => {
+  try {
+    const response = await fetch('/api/arbitrage/opportunities');
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.opportunities || [];
+
+  } catch (error) {
+    console.error('Failed to fetch arbitrage opportunities:', error);
+    return [];
+  }
+};
+
+/**
+ * Evaluate a specific opportunity
+ */
+export const evaluateOpportunity = async (productUrl: string, targetMargin?: number): Promise<any> => {
+  try {
+    const response = await fetch('/api/arbitrage/evaluate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productUrl, targetMargin }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    return await response.json();
+
+  } catch (error) {
+    console.error('Failed to evaluate opportunity:', error);
+    throw error;
+  }
+};
+
+/**
+ * Auto-list an opportunity (creates listing + scrapes images + launches campaign)
+ */
+export const autoListOpportunity = async (opportunity: ArbitrageOpportunity): Promise<{ success: boolean; listingId?: string }> => {
+  try {
+    // 1. Create marketplace listing
+    const listingResponse = await fetch('/api/marketplace/list', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productTitle: opportunity.productTitle,
+        productDescription: `High-quality ${opportunity.productTitle} available now!`,
+        marketplacePrice: opportunity.marketPrice,
+        supplierPrice: opportunity.supplierPrice,
+        supplierUrl: opportunity.supplierUrl,
+        supplierPlatform: opportunity.supplierPlatform,
+      }),
+    });
+
+    if (!listingResponse.ok) {
+      throw new Error('Failed to create listing');
+    }
+
+    const listingData = await listingResponse.json();
+    const listingId = listingData.listing?.listingId || listingData.listingId;
+
+    if (!listingId) {
+      throw new Error('No listing ID returned');
+    }
+
+    // 2. Scrape images (fire and forget - don't wait)
+    scrapeProductImages(listingId).catch(err =>
+      console.warn('Image scraping failed:', err)
+    );
+
+    // 3. Launch campaign (fire and forget)
+    fetch(`/api/campaigns/launch/${listingId}`, { method: 'POST' })
+      .catch(err => console.warn('Campaign launch failed:', err));
+
+    return { success: true, listingId };
+
+  } catch (error) {
+    console.error('Failed to auto-list opportunity:', error);
     return { success: false };
   }
 };

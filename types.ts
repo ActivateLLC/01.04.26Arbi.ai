@@ -35,3 +35,20 @@ export enum PipelineStage {
   OPTIMIZE_ROI = 'OPTIMIZE_ROI',
   FULFILL_ORDERS = 'FULFILL_ORDERS',
 }
+
+export interface ArbitrageOpportunity {
+  id: string;
+  productTitle: string;
+  productUrl: string;
+  supplierUrl: string;
+  supplierPlatform: string;
+  supplierPrice: number;
+  marketPrice: number;
+  estimatedProfit: number;
+  profitMargin: number;
+  score?: number; // 0-100 scoring
+  imageUrl?: string;
+  category?: string;
+  inStock?: boolean;
+  createdAt?: string;
+}
