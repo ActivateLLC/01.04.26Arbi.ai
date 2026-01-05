@@ -108,13 +108,9 @@ const App: React.FC = () => {
       {/* Sidebar (Desktop) */}
       <aside className="hidden lg:flex w-64 flex-col border-r border-white/5 bg-slate-950/50 backdrop-blur-xl fixed h-full z-20">
         <div className="p-6 border-b border-white/5">
-          <div className="flex items-center gap-3 text-white font-bold text-xl tracking-tight">
-             <img 
-               src="/components/Arbi_Logo-removebg-preview-_1_ (1).svg" 
-               alt="Arbi.ai Logo" 
-               className="w-10 h-10 object-contain"
-             />
-             Arbi<span className="text-emerald-500">.ai</span>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-cyan-500/20">A</div>
+            <span className="text-xl font-bold tracking-tight text-white">Arbi</span>
           </div>
         </div>
         
@@ -161,7 +157,7 @@ const App: React.FC = () => {
         <header className="lg:hidden flex justify-between items-center mb-6">
            <div className="flex items-center gap-2 text-white font-bold text-lg">
              <img 
-               src="/components/Arbi_Logo-removebg-preview-_1_ (1).svg" 
+               src="/components/logo.svg" 
                alt="Arbi.ai Logo" 
                className="w-8 h-8 object-contain"
              />
