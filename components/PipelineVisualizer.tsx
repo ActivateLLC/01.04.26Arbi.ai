@@ -22,25 +22,31 @@ const StageCard: React.FC<{
   const iconColor = isActive ? color.replace('border', 'text') : 'text-slate-600';
 
   return (
-    <div className={`relative p-5 rounded-xl border ${borderColor} ${bgGradient} backdrop-blur-sm transition-all duration-500 overflow-hidden group`}>
+    <article
+      className={`relative p-5 rounded-xl border ${borderColor} ${bgGradient} backdrop-blur-sm transition-all duration-500 overflow-hidden group`}
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label={`${title}: ${isActive ? subtext : isSystemActive ? 'Waiting' : 'Idle'}`}
+    >
       {isActive && (
-        <div className="absolute inset-0 bg-white/5 animate-pulse" />
+        <div className="absolute inset-0 bg-white/5 animate-pulse" aria-hidden="true" />
       )}
-      
+
       <div className="relative z-10 flex flex-col h-full justify-between">
         <div className="flex justify-between items-start mb-4">
-          <div className={`p-3 rounded-lg bg-slate-950 border border-white/10 ${iconColor} transition-colors duration-300`}>
+          <div className={`p-3 rounded-lg bg-slate-950 border border-white/10 ${iconColor} transition-colors duration-300`} aria-hidden="true">
             {icon}
           </div>
           {isActive && (
-             <div className="flex space-x-1">
+             <div className="flex space-x-1" aria-hidden="true">
                 <span className={`w-1.5 h-1.5 rounded-full ${iconColor.replace('text', 'bg')} animate-bounce`} style={{ animationDelay: '0ms' }}></span>
                 <span className={`w-1.5 h-1.5 rounded-full ${iconColor.replace('text', 'bg')} animate-bounce`} style={{ animationDelay: '150ms' }}></span>
                 <span className={`w-1.5 h-1.5 rounded-full ${iconColor.replace('text', 'bg')} animate-bounce`} style={{ animationDelay: '300ms' }}></span>
              </div>
           )}
         </div>
-        
+
         <div>
           <h3 className={`text-base font-semibold ${isActive ? 'text-white' : 'text-slate-400'} mb-1`}>{title}</h3>
           <p className="text-xs text-slate-500 leading-relaxed mb-3 h-8 overflow-hidden">{description}</p>
@@ -49,7 +55,7 @@ const StageCard: React.FC<{
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
 

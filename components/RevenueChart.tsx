@@ -1,12 +1,35 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { AlertTriangle } from 'lucide-react';
 import { ChartDataPoint } from '../types';
 
 interface RevenueChartProps {
   data: ChartDataPoint[];
+  error?: Error | null;
 }
 
-export const RevenueChart: React.FC<RevenueChartProps> = React.memo(({ data }) => {
+export const RevenueChart: React.FC<RevenueChartProps> = React.memo(({ data, error }) => {
+  // Error state
+  if (error) {
+    return (
+      <div className="w-full h-full min-h-[200px] flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle size={32} className="text-red-400 mb-2 mx-auto" />
+          <p className="text-sm text-red-400">Failed to load chart</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full h-full min-h-[200px] flex items-center justify-center">
+        <p className="text-sm text-slate-500">No data available</p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full min-h-[200px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -29,37 +52,37 @@ export const RevenueChart: React.FC<RevenueChartProps> = React.memo(({ data }) =
               <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <XAxis 
-            dataKey="time" 
-            tick={{fontSize: 10, fill: '#64748b'}} 
+          <XAxis
+            dataKey="time"
+            tick={{fontSize: 10, fill: '#64748b'}}
             axisLine={false}
             tickLine={false}
           />
-          <YAxis 
-            tick={{fontSize: 10, fill: '#64748b'}} 
+          <YAxis
+            tick={{fontSize: 10, fill: '#64748b'}}
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip 
+          <Tooltip
             contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
             itemStyle={{ fontSize: '12px' }}
             labelStyle={{ color: '#94a3b8', fontSize: '10px', marginBottom: '4px' }}
           />
-          <Area 
-            type="monotone" 
-            dataKey="spend" 
-            stroke="#ef4444" 
+          <Area
+            type="monotone"
+            dataKey="spend"
+            stroke="#ef4444"
             strokeWidth={1}
-            fillOpacity={1} 
-            fill="url(#colorSpend)" 
+            fillOpacity={1}
+            fill="url(#colorSpend)"
           />
-          <Area 
-            type="monotone" 
-            dataKey="profit" 
-            stroke="#10b981" 
+          <Area
+            type="monotone"
+            dataKey="profit"
+            stroke="#10b981"
             strokeWidth={2}
-            fillOpacity={1} 
-            fill="url(#colorProfit)" 
+            fillOpacity={1}
+            fill="url(#colorProfit)"
           />
         </AreaChart>
       </ResponsiveContainer>

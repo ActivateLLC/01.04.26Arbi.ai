@@ -84,30 +84,47 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* Risk Tolerance */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] text-indigo-400 font-mono border border-indigo-500/30">3</span>
+            <label htmlFor="risk-tolerance-slider" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] text-indigo-400 font-mono border border-indigo-500/30" aria-hidden="true">3</span>
               Risk Tolerance
             </label>
-            <span className={`font-mono px-2 py-0.5 rounded text-sm border ${
-              riskTolerance > 70 ? 'text-red-400 bg-red-950/30 border-red-900' : 
-              riskTolerance > 40 ? 'text-yellow-400 bg-yellow-950/30 border-yellow-900' :
-              'text-blue-400 bg-blue-950/30 border-blue-900'
-            }`}>
+            <span
+              className={`font-mono px-2 py-0.5 rounded text-sm border ${
+                riskTolerance > 70 ? 'text-red-400 bg-red-950/30 border-red-900' :
+                riskTolerance > 40 ? 'text-yellow-400 bg-yellow-950/30 border-yellow-900' :
+                'text-blue-400 bg-blue-950/30 border-blue-900'
+              }`}
+              aria-live="polite"
+            >
               {riskTolerance}%
             </span>
           </div>
           <div className="h-12 flex items-center px-1">
             <input
+              id="risk-tolerance-slider"
               type="range"
               min="1"
               max="100"
               value={riskTolerance}
               onChange={(e) => setRiskTolerance(Number(e.target.value))}
               disabled={isActive}
-              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 disabled:opacity-50"
+              aria-label="Risk tolerance percentage"
+              aria-valuemin={1}
+              aria-valuemax={100}
+              aria-valuenow={riskTolerance}
+              aria-valuetext={`${riskTolerance}% - ${
+                riskTolerance > 70 ? 'Aggressive' :
+                riskTolerance > 40 ? 'Moderate' :
+                'Conservative'
+              }`}
+              aria-describedby="risk-tolerance-description"
+              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-900"
             />
+            <span id="risk-tolerance-description" className="sr-only">
+              Adjust risk tolerance from conservative (1%) to aggressive (100%). Cannot be changed while system is active.
+            </span>
           </div>
-          <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-500 font-medium">
+          <div className="flex justify-between text-[10px] uppercase tracking-wider text-slate-500 font-medium" aria-hidden="true">
             <span>Conservative</span>
             <span>Aggressive</span>
           </div>
@@ -115,13 +132,17 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
       </div>
       
       {isActive && (
-         <div className="flex items-center gap-3 bg-emerald-500/5 border border-emerald-500/20 p-3 rounded-lg animate-pulse">
-            <Activity size={16} className="text-emerald-400" />
+         <div
+           className="flex items-center gap-3 bg-emerald-500/5 border border-emerald-500/20 p-3 rounded-lg animate-pulse"
+           role="status"
+           aria-live="polite"
+         >
+            <Activity size={16} className="text-emerald-400" aria-hidden="true" />
             <span className="text-xs text-emerald-300 font-mono uppercase tracking-widest">
               System Running • AI Autonomous Mode Engaged
             </span>
          </div>
       )}
-    </div>
+    </section>
   );
 };

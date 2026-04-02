@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { ControlPanel } from './components/ControlPanel';
 import { PipelineVisualizer } from './components/PipelineVisualizer';
@@ -10,44 +10,39 @@ import { VisuallyHidden } from './components/VisuallyHidden';
 // Lazy load heavy components for code splitting
 const MarketplaceStats = lazy(() => import('./components/MarketplaceStats').then(module => ({ default: module.MarketplaceStats })));
 const Opportunities = lazy(() => import('./components/Opportunities').then(module => ({ default: module.Opportunities })));
-import { SystemStatus, LogEntry, ChartDataPoint, PipelineStage } from './types';
+import { SystemStatus, PipelineStage, ChartDataPoint } from './types';
 import { generateSystemLogs } from './services/geminiService';
 import { LayoutGrid, Settings, Wallet, Bell, Menu, Package, Search, RefreshCw } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
+import { useAppStore } from './src/store/appStore';
 
 const App: React.FC = () => {
-  // --- State ---
-  const [activeTab, setActiveTab] = useState<'simulation' | 'opportunities' | 'marketplace'>('simulation');
-  const [status, setStatus] = useState<SystemStatus>(SystemStatus.IDLE);
-  const [dailySpend, setDailySpend] = useState<number>(500);
-  const [riskTolerance, setRiskTolerance] = useState<number>(35);
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [activeStage, setActiveStage] = useState<PipelineStage | null>(null);
-  const [totalProfit, setTotalProfit] = useState<number>(0);
-  const [roi, setRoi] = useState<number>(0);
-  
-  // Mock Chart Data
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  // --- Global State from Zustand ---
+  const activeTab = useAppStore(state => state.activeTab);
+  const setActiveTab = useAppStore(state => state.setActiveTab);
+  const status = useAppStore(state => state.status);
+  const toggleStatus = useAppStore(state => state.toggleStatus);
+  const dailySpend = useAppStore(state => state.dailySpend);
+  const setDailySpend = useAppStore(state => state.setDailySpend);
+  const riskTolerance = useAppStore(state => state.riskTolerance);
+  const setRiskTolerance = useAppStore(state => state.setRiskTolerance);
+  const logs = useAppStore(state => state.logs);
+  const addLogs = useAppStore(state => state.addLogs);
+  const activeStage = useAppStore(state => state.activeStage);
+  const setActiveStage = useAppStore(state => state.setActiveStage);
+  const totalProfit = useAppStore(state => state.totalProfit);
+  const incrementTotalProfit = useAppStore(state => state.incrementTotalProfit);
+  const roi = useAppStore(state => state.roi);
+  const setRoi = useAppStore(state => state.setRoi);
+  const chartData = useAppStore(state => state.chartData);
+  const addChartDataPoint = useAppStore(state => state.addChartDataPoint);
+  const initializeChartData = useAppStore(state => state.initializeChartData);
 
   // --- Effects ---
 
-  // Initialization
+  // Initialization - Chart data only (logs are initialized in store)
   useEffect(() => {
-    // Initial logs
-    setLogs([
-      { id: uuidv4(), timestamp: new Date().toLocaleTimeString(), category: 'SYSTEM', message: 'ArbiOS v4.2.0 initialized.' },
-      { id: uuidv4(), timestamp: new Date().toLocaleTimeString(), category: 'SYSTEM', message: 'Waiting for user input...' },
-    ]);
-
-    // Initial Chart Data (Empty)
-    const initialData = Array.from({ length: 10 }).map((_, i) => ({
-      time: new Date(Date.now() - (10 - i) * 60000).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit'}),
-      revenue: 0,
-      spend: 0,
-      profit: 0
-    }));
-    setChartData(initialData);
-  }, []);
+    initializeChartData();
+  }, [initializeChartData]);
 
   // Simulation Loop
   useEffect(() => {
@@ -56,89 +51,95 @@ const App: React.FC = () => {
     const runSimulation = async () => {
       // 1. Generate Logs
       const newLogs = await generateSystemLogs(Math.floor(Math.random() * 2) + 1);
-      setLogs(prev => [...prev, ...newLogs].slice(-50)); // Keep last 50
+      addLogs(newLogs);
 
       // 2. Update Stats
       const profitIncrement = Math.random() * 50 + 10;
-      setTotalProfit(prev => prev + profitIncrement);
-      setRoi(prev => Math.min(320, prev + (Math.random() * 5))); // Trend towards 300%
+      incrementTotalProfit(profitIncrement);
+      setRoi(Math.min(320, roi + (Math.random() * 5))); // Trend towards 300%
 
       // 3. Update Visualizer State (Cycle randomly)
       const stages = Object.values(PipelineStage);
       setActiveStage(stages[Math.floor(Math.random() * stages.length)]);
 
       // 4. Update Chart
-      setChartData(prev => {
-        const last = prev[prev.length - 1];
-        const now = new Date();
-        // Shift time slightly
-        const newTime = now.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit'});
-        
-        // Random walk for aesthetic chart
-        const newSpend = dailySpend / 24 + (Math.random() * 20 - 10);
-        const newProfit = newSpend * (riskTolerance > 50 ? 3.5 : 2.5) + (Math.random() * 50);
+      const now = new Date();
+      const newTime = now.toLocaleTimeString([], { hour: '2-digit', minute:'2-digit'});
 
-        const newPoint: ChartDataPoint = {
-            time: newTime,
-            revenue: newSpend + newProfit,
-            spend: newSpend,
-            profit: newProfit
-        };
+      // Random walk for aesthetic chart
+      const newSpend = dailySpend / 24 + (Math.random() * 20 - 10);
+      const newProfit = newSpend * (riskTolerance > 50 ? 3.5 : 2.5) + (Math.random() * 50);
 
-        return [...prev.slice(1), newPoint];
-      });
+      const newPoint: ChartDataPoint = {
+          time: newTime,
+          revenue: newSpend + newProfit,
+          spend: newSpend,
+          profit: newProfit
+      };
+
+      addChartDataPoint(newPoint);
     };
 
     const intervalId = setInterval(runSimulation, 3000); // Run every 3 seconds
 
     return () => clearInterval(intervalId);
-  }, [status, dailySpend, riskTolerance]);
+  }, [status, dailySpend, riskTolerance, roi, addLogs, incrementTotalProfit, setRoi, setActiveStage, addChartDataPoint]);
 
   // --- Handlers ---
-  const handleToggleStatus = () => {
-    if (status === SystemStatus.ACTIVE) {
-      setStatus(SystemStatus.IDLE);
-      setLogs(prev => [...prev, { id: uuidv4(), timestamp: new Date().toLocaleTimeString(), category: 'SYSTEM', message: 'Sequence aborted by user.' }]);
-      setActiveStage(null);
-    } else {
-      setStatus(SystemStatus.ACTIVE);
-      setLogs(prev => [...prev, { id: uuidv4(), timestamp: new Date().toLocaleTimeString(), category: 'SYSTEM', message: 'Authentication successful. Neural engine spooling up...' }]);
-    }
-  };
+  // Toggle status is now handled by the store
+  const handleToggleStatus = toggleStatus;
 
   return (
-    <div className="min-h-screen flex text-slate-200 selection:bg-emerald-500/30">
-      {/* Skip to main content link for keyboard users */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-emerald-500 focus:text-white focus:rounded-lg focus:shadow-lg"
-        style={{
-          position: 'absolute',
-          left: '-9999px',
-          top: 'auto',
-          width: '1px',
-          height: '1px',
-          overflow: 'hidden',
+    <>
+      {/* Toast Notifications */}
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        gutter={8}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#1e293b',
+            color: '#cbd5e1',
+            border: '1px solid #475569',
+            borderRadius: '12px',
+            padding: '16px',
+          },
         }}
-        onFocus={(e) => {
-          e.currentTarget.style.position = 'fixed';
-          e.currentTarget.style.left = '1rem';
-          e.currentTarget.style.top = '1rem';
-          e.currentTarget.style.width = 'auto';
-          e.currentTarget.style.height = 'auto';
-          e.currentTarget.style.overflow = 'visible';
-        }}
-        onBlur={(e) => {
-          e.currentTarget.style.position = 'absolute';
-          e.currentTarget.style.left = '-9999px';
-          e.currentTarget.style.top = 'auto';
-          e.currentTarget.style.width = '1px';
-          e.currentTarget.style.height = '1px';
-          e.currentTarget.style.overflow = 'hidden';
-        }}
-      >
-        Skip to main content
-      </a>
+      />
+
+      <div className="min-h-screen flex text-slate-200 selection:bg-emerald-500/30">
+        {/* Skip to main content link for keyboard users */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-emerald-500 focus:text-white focus:rounded-lg focus:shadow-lg"
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: 'auto',
+            width: '1px',
+            height: '1px',
+            overflow: 'hidden',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.position = 'fixed';
+            e.currentTarget.style.left = '1rem';
+            e.currentTarget.style.top = '1rem';
+            e.currentTarget.style.width = 'auto';
+            e.currentTarget.style.height = 'auto';
+            e.currentTarget.style.overflow = 'visible';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.position = 'absolute';
+            e.currentTarget.style.left = '-9999px';
+            e.currentTarget.style.top = 'auto';
+            e.currentTarget.style.width = '1px';
+            e.currentTarget.style.height = '1px';
+            e.currentTarget.style.overflow = 'hidden';
+          }}
+        >
+          Skip to main content
+        </a>
 
       {/* Sidebar (Desktop) */}
       <aside
@@ -303,7 +304,8 @@ const App: React.FC = () => {
         )}
 
       </main>
-    </div>
+      </div>
+    </>
   );
 };
 

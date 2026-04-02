@@ -1,35 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import { getMarketplaceStats, MarketplaceStats as Stats } from '../services/arbiService';
-import { Package, TrendingUp, DollarSign, Percent } from 'lucide-react';
+import React from 'react';
+import { useMarketplaceStats } from '../src/hooks/useMarketplaceStats';
+import { MarketplaceStats as Stats } from '../services/arbiService';
+import { StatCardSkeleton } from './LoadingSkeleton';
+import { Package, TrendingUp, DollarSign, Percent, AlertTriangle, RefreshCw } from 'lucide-react';
 
 export const MarketplaceStats: React.FC = React.memo(() => {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      setLoading(true);
-      const data = await getMarketplaceStats();
-      setStats(data);
-      setLoading(false);
-    };
-
-    fetchStats();
-    
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchStats, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  const { data: stats, isLoading: loading, error, refetch } = useMarketplaceStats({
+    refetchInterval: 30 * 1000, // 30 seconds
+    enabled: true,
+  });
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 animate-pulse">
-            <div className="h-4 bg-slate-700 rounded w-1/2 mb-4"></div>
-            <div className="h-8 bg-slate-700 rounded w-3/4"></div>
-          </div>
-        ))}
+        <StatCardSkeleton count={4} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 text-center mb-8">
+        <AlertTriangle size={48} className="text-red-400 mb-4 mx-auto" />
+        <h3 className="text-xl font-semibold text-red-400 mb-2">Failed to Load Marketplace Stats</h3>
+        <p className="text-red-300 mb-6">
+          {error instanceof Error ? error.message : 'Unable to fetch marketplace data. Please try again.'}
+        </p>
+        <button
+          onClick={() => refetch()}
+          className="px-6 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-all flex items-center justify-center gap-2 mx-auto"
+        >
+          <RefreshCw size={18} />
+          Retry
+        </button>
       </div>
     );
   }
@@ -132,7 +135,7 @@ export const MarketplaceStats: React.FC = React.memo(() => {
       </div>
     </>
   );
-};
+});
 
 // Stat Card Component
 const StatCard: React.FC<{
@@ -141,7 +144,7 @@ const StatCard: React.FC<{
   value: string;
   subtext: string;
   color: 'emerald' | 'blue' | 'violet' | 'amber';
-}> = ({ icon, label, value, subtext, color }) => {
+}> = React.memo(({ icon, label, value, subtext, color }) => {
   const colorClasses = {
     emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -164,4 +167,4 @@ const StatCard: React.FC<{
       </div>
     </div>
   );
-};
+});

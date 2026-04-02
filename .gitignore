@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Test artifacts
+coverage
+*.lcov
+.vitest
+test-results
+playwright-report
+playwright/.cache

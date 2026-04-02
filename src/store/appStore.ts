@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { SystemStatus, LogEntry, ChartDataPoint, PipelineStage } from '../types';
+import { SystemStatus, LogEntry, ChartDataPoint, PipelineStage } from '../../types';
 import { v4 as uuidv4 } from 'uuid';
 
 interface AppState {

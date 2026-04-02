@@ -42,9 +42,9 @@ export const Dashboard: React.FC = () => {
 
   if (loading && !stats) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
         <div className="flex items-center gap-3 text-slate-400">
-          <RefreshCw className="animate-spin" size={20} />
+          <RefreshCw className="animate-spin" size={20} aria-hidden="true" />
           <span>Loading marketplace data...</span>
         </div>
       </div>
@@ -53,9 +53,9 @@ export const Dashboard: React.FC = () => {
 
   if (error && !stats) {
     return (
-      <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-6">
+      <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-6" role="alert" aria-live="assertive">
         <div className="flex items-center gap-3 text-red-400">
-          <Activity size={20} />
+          <Activity size={20} aria-hidden="true" />
           <div>
             <div className="font-semibold">Connection Error</div>
             <div className="text-sm text-red-300 mt-1">{error}</div>
@@ -63,7 +63,8 @@ export const Dashboard: React.FC = () => {
         </div>
         <button
           onClick={fetchMarketplaceData}
-          className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-sm font-medium transition-colors"
+          aria-label="Retry marketplace connection"
+          className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
         >
           Retry Connection
         </button>
@@ -72,11 +73,16 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <section className="space-y-6" aria-labelledby="marketplace-heading">
+      {/* Screen reader status updates */}
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+        {loading && 'Refreshing marketplace data...'}
+      </div>
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <header className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Live Marketplace</h2>
+          <h2 id="marketplace-heading" className="text-2xl font-bold text-white">Live Marketplace</h2>
           <p className="text-sm text-slate-400 mt-1">
             Real-time product opportunities from API
           </p>
@@ -84,73 +90,74 @@ export const Dashboard: React.FC = () => {
         <button
           onClick={fetchMarketplaceData}
           disabled={loading}
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+          aria-label={loading ? 'Refreshing marketplace data' : 'Refresh marketplace data'}
+          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500"
         >
-          <RefreshCw className={loading ? 'animate-spin' : ''} size={16} />
+          <RefreshCw className={loading ? 'animate-spin' : ''} size={16} aria-hidden="true" />
           {loading ? 'Updating...' : 'Refresh'}
         </button>
-      </div>
+      </header>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6" role="region" aria-label="Marketplace statistics">
         {/* Total Products */}
-        <div className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl hover:border-blue-500/30 transition-colors">
+        <article className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl hover:border-blue-500/30 transition-colors">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            <div className="p-3 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20" aria-hidden="true">
               <Package size={24} />
             </div>
-            <div className="text-xs font-mono text-slate-500 uppercase">Live Count</div>
+            <div className="text-xs font-mono text-slate-500 uppercase" aria-hidden="true">Live Count</div>
           </div>
-          <div className="text-4xl font-bold text-white font-mono mb-1">
+          <div className="text-4xl font-bold text-white font-mono mb-1" aria-label={`${stats?.totalListings || 0} total listings`}>
             {stats?.totalListings.toLocaleString() || '0'}
           </div>
           <div className="text-sm text-slate-400">Total Listings</div>
           <div className="text-xs text-slate-500 mt-2">
-            Active: {stats?.activeListings.toLocaleString() || '0'}
+            Active: <span aria-label={`${stats?.activeListings || 0} active listings`}>{stats?.activeListings.toLocaleString() || '0'}</span>
           </div>
-        </div>
+        </article>
 
         {/* Potential Revenue */}
-        <div className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl hover:border-indigo-500/30 transition-colors">
+        <article className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl hover:border-indigo-500/30 transition-colors">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <div className="p-3 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" aria-hidden="true">
               <DollarSign size={24} />
             </div>
-            <div classtotalPame="text-xs font-mono text-slate-500 uppercase">Revenue</div>
+            <div className="text-xs font-mono text-slate-500 uppercase" aria-hidden="true">Revenue</div>
           </div>
-          <div className="text-4xl font-bold text-white font-mono mb-1">
+          <div className="text-4xl font-bold text-white font-mono mb-1" aria-label={`${(stats?.potentialRevenue || 0).toLocaleString()} dollars potential revenue`}>
             ${(stats?.potentialRevenue || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
           <div className="text-sm text-slate-400">Potential Revenue</div>
-        </div>
+        </article>
 
         {/* Potential Profit */}
-        <div className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl hover:border-emerald-500/30 transition-colors">
+        <article className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl hover:border-emerald-500/30 transition-colors">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" aria-hidden="true">
               <TrendingUp size={24} />
             </div>
-            <div className="text-xs font-mono text-slate-500 uppercase">Profit</div>
+            <div className="text-xs font-mono text-slate-500 uppercase" aria-hidden="true">Profit</div>
           </div>
-          <div className="text-4xl font-bold text-emerald-400 font-mono mb-1">
+          <div className="text-4xl font-bold text-emerald-400 font-mono mb-1" aria-label={`${(stats?.totalPotentialProfit || 0).toLocaleString()} dollars potential profit`}>
             ${(stats?.totalPotentialProfit || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
           <div className="text-sm text-slate-400">Potential Profit</div>
-        </div>
+        </article>
 
         {/* Avg Margin */}
-        <div className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl hover:border-violet-500/30 transition-colors">
+        <article className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl hover:border-violet-500/30 transition-colors">
           <div className="flex items-center justify-between mb-4">
-            <div className="p-3 rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">
+            <div className="p-3 rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20" aria-hidden="true">
               <Activity size={24} />
             </div>
-            <div className="text-xs font-mono text-slate-500 uppercase">Margin</div>
+            <div className="text-xs font-mono text-slate-500 uppercase" aria-hidden="true">Margin</div>
           </div>
-          <div className="text-4xl font-bold text-white font-mono mb-1">
+          <div className="text-4xl font-bold text-white font-mono mb-1" aria-label={`${(stats?.averageMargin || 0).toFixed(2)} dollars average margin`}>
             ${(stats?.averageMargin || 0).toFixed(2)}
           </div>
           <div className="text-sm text-slate-400">Average Margin</div>
-        </div>
+        </article>
       </div>
 
       {/* Last Updated */}

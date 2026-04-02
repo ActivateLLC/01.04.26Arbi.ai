@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ArbitrageOpportunity } from '../types';
-import { getArbitrageOpportunities, autoListOpportunity } from '../services/arbiService';
+import { useOpportunities } from '../src/hooks/useOpportunities';
+import { useAutoList } from '../src/hooks/useAutoList';
+import { useDebounce } from '../hooks/useDebounce';
+import { showError } from '../utils/toast';
+import { OpportunityCardSkeleton } from './LoadingSkeleton';
 import { TrendingUp, DollarSign, Package, Target, Zap, X, RefreshCw, Filter } from 'lucide-react';
 
 export const Opportunities: React.FC = () => {
-  const [opportunities, setOpportunities] = useState<ArbitrageOpportunity[]>([]);
-  const [filteredOpportunities, setFilteredOpportunities] = useState<ArbitrageOpportunity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(300000); // 5 min default
 
@@ -16,76 +16,52 @@ export const Opportunities: React.FC = () => {
   const [maxPrice, setMaxPrice] = useState(500);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Debounced filter values for better performance
+  const debouncedMinMargin = useDebounce(minMargin, 300);
+  const debouncedMaxPrice = useDebounce(maxPrice, 300);
+
   // Action states
-  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Fetch opportunities
-  const fetchOpportunities = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getArbitrageOpportunities();
-      setOpportunities(data);
-    } catch (err) {
-      setError('Failed to fetch opportunities. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // React Query hooks
+  const {
+    data: opportunities = [],
+    isLoading: loading,
+    error,
+    refetch
+  } = useOpportunities({
+    refetchInterval: autoRefresh ? refreshInterval : false,
+    enabled: true,
+  });
 
-  // Initial fetch
-  useEffect(() => {
-    fetchOpportunities();
-  }, []);
+  const autoListMutation = useAutoList({
+    onSuccess: (data, opportunity) => {
+      setSuccessMessage(`Successfully listed: ${opportunity.productTitle}`);
+      setDismissedIds(prev => new Set(prev).add(opportunity.id));
 
-  // Auto-refresh
-  useEffect(() => {
-    if (!autoRefresh) return;
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(null), 5000);
+    },
+    onError: (error, opportunity) => {
+      showError(`Failed to list ${opportunity.productTitle}. Please try again.`);
+      console.error(error);
+    },
+  });
 
-    const intervalId = setInterval(fetchOpportunities, refreshInterval);
-    return () => clearInterval(intervalId);
-  }, [autoRefresh, refreshInterval]);
-
-  // Apply filters
-  useEffect(() => {
-    const filtered = opportunities.filter(opp => {
+  // Apply filters using useMemo for performance with debounced values
+  const filteredOpportunities = useMemo(() => {
+    return opportunities.filter(opp => {
       if (dismissedIds.has(opp.id)) return false;
-      if (opp.profitMargin < minMargin) return false;
-      if (opp.supplierPrice > maxPrice) return false;
+      if (opp.profitMargin < debouncedMinMargin) return false;
+      if (opp.supplierPrice > debouncedMaxPrice) return false;
       return true;
     });
-    setFilteredOpportunities(filtered);
-  }, [opportunities, minMargin, maxPrice, dismissedIds]);
+  }, [opportunities, debouncedMinMargin, debouncedMaxPrice, dismissedIds]);
 
   // Handle auto-list
-  const handleAutoList = async (opportunity: ArbitrageOpportunity) => {
-    setProcessingIds(prev => new Set(prev).add(opportunity.id));
-
-    try {
-      const result = await autoListOpportunity(opportunity);
-
-      if (result.success) {
-        setSuccessMessage(`Successfully listed: ${opportunity.productTitle}`);
-        setDismissedIds(prev => new Set(prev).add(opportunity.id));
-
-        // Clear success message after 5 seconds
-        setTimeout(() => setSuccessMessage(null), 5000);
-      } else {
-        alert('Failed to create listing. Please try again.');
-      }
-    } catch (err) {
-      alert('An error occurred. Please try again.');
-      console.error(err);
-    } finally {
-      setProcessingIds(prev => {
-        const next = new Set(prev);
-        next.delete(opportunity.id);
-        return next;
-      });
-    }
+  const handleAutoList = (opportunity: ArbitrageOpportunity) => {
+    autoListMutation.mutate(opportunity);
   };
 
   // Handle dismiss
@@ -129,7 +105,7 @@ export const Opportunities: React.FC = () => {
           </button>
 
           <button
-            onClick={fetchOpportunities}
+            onClick={() => refetch()}
             disabled={loading}
             className="px-4 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-all flex items-center gap-2 border border-emerald-500/20"
           >
@@ -211,18 +187,15 @@ export const Opportunities: React.FC = () => {
 
       {/* Loading State */}
       {loading && opportunities.length === 0 ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <RefreshCw size={48} className="text-emerald-500 animate-spin mb-4 mx-auto" />
-            <p className="text-slate-400">Scanning for opportunities...</p>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <OpportunityCardSkeleton count={4} />
         </div>
       ) : error ? (
         /* Error State */
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-8 text-center">
-          <p className="text-red-400 mb-4">{error}</p>
+          <p className="text-red-400 mb-4">{error instanceof Error ? error.message : 'Failed to fetch opportunities. Please try again.'}</p>
           <button
-            onClick={fetchOpportunities}
+            onClick={() => refetch()}
             className="px-6 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 transition-all"
           >
             Try Again
@@ -253,7 +226,7 @@ export const Opportunities: React.FC = () => {
             <OpportunityCard
               key={opportunity.id}
               opportunity={opportunity}
-              isProcessing={processingIds.has(opportunity.id)}
+              isProcessing={autoListMutation.isPending && autoListMutation.variables?.id === opportunity.id}
               onAutoList={handleAutoList}
               onDismiss={handleDismiss}
               getScoreColor={getScoreColor}

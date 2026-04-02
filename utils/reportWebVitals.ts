@@ -1,6 +1,6 @@
-import { onCLS, onFID, onFCP, onLCP, onTTFB, onINP, Metric } from 'web-vitals';
+import { onCLS, onFCP, onLCP, onTTFB, onINP, Metric } from 'web-vitals';
 
-type MetricName = 'CLS' | 'FID' | 'FCP' | 'LCP' | 'TTFB' | 'INP';
+type MetricName = 'CLS' | 'FCP' | 'LCP' | 'TTFB' | 'INP';
 
 interface WebVitalsReport {
   name: MetricName;
