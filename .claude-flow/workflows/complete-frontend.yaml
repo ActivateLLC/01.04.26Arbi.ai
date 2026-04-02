@@ -1,0 +1,178 @@
+name: "Complete Arbi.ai Frontend"
+description: "Autonomous swarm to complete the e-commerce arbitrage frontend application"
+version: "1.0.0"
+
+topology: hierarchical
+max_agents: 12
+consensus: raft
+
+phases:
+  - name: "Analysis & Planning"
+    agents:
+      - type: "architecture/system-design"
+        task: |
+          Analyze the current Arbi.ai frontend codebase:
+          1. Review all components, services, and types
+          2. Identify missing features, incomplete implementations
+          3. Check for TODO comments, placeholder functions
+          4. Verify API integration completeness
+          5. Document gaps in error handling, loading states
+          6. Create comprehensive completion roadmap
+        priority: critical
+
+  - name: "Core Features Completion"
+    agents:
+      - type: "development/backend"
+        task: |
+          Complete service layer integrations:
+          1. Add error handling to arbiService.ts
+          2. Implement retry logic for failed API calls
+          3. Add request caching for marketplace data
+          4. Complete geminiService with fallback strategies
+          5. Add TypeScript strict mode compatibility
+        priority: high
+
+      - type: "specialized/mobile"
+        task: |
+          Enhance responsive design:
+          1. Test and fix mobile breakpoints
+          2. Add touch gestures for charts
+          3. Optimize mobile navigation
+          4. Fix tablet layout issues
+          5. Add PWA manifest and service worker
+        priority: medium
+
+  - name: "UI/UX Enhancement"
+    agents:
+      - type: "development/frontend"
+        task: |
+          Complete dashboard components:
+          1. Add loading skeletons to all components
+          2. Implement proper error boundaries
+          3. Add toast notifications system
+          4. Complete RevenueChart with zoom/pan
+          5. Add export data functionality
+          6. Implement dark/light theme toggle
+        priority: high
+
+      - type: "development/frontend"
+        task: |
+          Enhance Opportunities component:
+          1. Add image carousel for products
+          2. Implement infinite scroll or pagination
+          3. Add bulk actions (select multiple)
+          4. Create comparison view
+          5. Add save/favorite functionality
+        priority: medium
+
+  - name: "Data & State Management"
+    agents:
+      - type: "development/backend"
+        task: |
+          Implement proper state management:
+          1. Add React Context or Zustand for global state
+          2. Implement proper data fetching with React Query
+          3. Add optimistic updates for auto-list
+          4. Implement WebSocket for real-time updates
+          5. Add local storage persistence
+        priority: high
+
+  - name: "Testing & Quality"
+    agents:
+      - type: "development/testing"
+        task: |
+          Add comprehensive testing:
+          1. Set up Vitest or Jest
+          2. Write unit tests for services
+          3. Add component tests with Testing Library
+          4. Create E2E tests with Playwright
+          5. Add visual regression tests
+          6. Achieve >80% code coverage
+        priority: critical
+
+      - type: "development/linting"
+        task: |
+          Code quality & standards:
+          1. Configure ESLint with strict rules
+          2. Add Prettier for formatting
+          3. Set up Husky pre-commit hooks
+          4. Add TypeScript strict mode
+          5. Fix all linting warnings
+          6. Add import sorting
+        priority: medium
+
+  - name: "Performance & Optimization"
+    agents:
+      - type: "optimization/performance"
+        task: |
+          Optimize application performance:
+          1. Add React.memo to expensive components
+          2. Implement code splitting and lazy loading
+          3. Optimize bundle size (analyze with Vite)
+          4. Add image optimization
+          5. Implement virtual scrolling for lists
+          6. Add performance monitoring
+        priority: high
+
+  - name: "Documentation & DevOps"
+    agents:
+      - type: "documentation/api"
+        task: |
+          Complete documentation:
+          1. Document all components with JSDoc
+          2. Create Storybook for component library
+          3. Write detailed README with setup
+          4. Add API documentation
+          5. Create deployment guide
+          6. Add troubleshooting section
+        priority: medium
+
+      - type: "devops/ci-cd"
+        task: |
+          Set up deployment pipeline:
+          1. Create GitHub Actions workflow
+          2. Add automated testing in CI
+          3. Configure build optimization
+          4. Set up preview deployments
+          5. Add environment variable management
+          6. Configure monitoring and logging
+        priority: high
+
+  - name: "Security & Analytics"
+    agents:
+      - type: "security/audit"
+        task: |
+          Security hardening:
+          1. Add input validation for all forms
+          2. Implement CSP headers
+          3. Add rate limiting for API calls
+          4. Secure API key handling
+          5. Add security headers
+          6. Run security audit
+        priority: critical
+
+      - type: "analytics/tracking"
+        task: |
+          Implement analytics:
+          1. Add Google Analytics or Plausible
+          2. Track user interactions
+          3. Monitor conversion funnels
+          4. Add error tracking (Sentry)
+          5. Create analytics dashboard
+        priority: low
+
+completion_criteria:
+  - All components have loading states
+  - All API calls have error handling
+  - Test coverage > 80%
+  - No TypeScript errors in strict mode
+  - All linting warnings resolved
+  - Build size < 500KB gzipped
+  - Lighthouse score > 90
+  - Documentation complete
+  - CI/CD pipeline functional
+
+output:
+  report: ".claude-flow/sessions/frontend-completion-report.md"
+  metrics: ".claude-flow/metrics/frontend-completion.json"
+  logs: ".claude-flow/logs/frontend-completion.log"
