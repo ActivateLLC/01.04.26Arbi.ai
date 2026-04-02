@@ -105,13 +105,13 @@ export const useAppStore = create<AppState>()(
         {
           id: uuidv4(),
           timestamp: new Date().toLocaleTimeString(),
-          category: 'SYSTEM',
+          category: 'SYSTEM' as const,
           message: 'ArbiOS v4.2.0 initialized.'
         },
         {
           id: uuidv4(),
           timestamp: new Date().toLocaleTimeString(),
-          category: 'SYSTEM',
+          category: 'SYSTEM' as const,
           message: 'Waiting for user input...'
         },
       ],
@@ -145,7 +145,7 @@ export const useAppStore = create<AppState>()(
               {
                 id: uuidv4(),
                 timestamp: new Date().toLocaleTimeString(),
-                category: 'SYSTEM',
+                category: 'SYSTEM' as const,
                 message: 'Logs cleared.'
               }
             ]
@@ -194,7 +194,7 @@ export const useAppStore = create<AppState>()(
               {
                 id: uuidv4(),
                 timestamp: new Date().toLocaleTimeString(),
-                category: 'SYSTEM',
+                category: 'SYSTEM' as const,
                 message: 'Simulation reset.'
               }
             ]

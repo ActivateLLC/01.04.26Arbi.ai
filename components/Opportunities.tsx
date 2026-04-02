@@ -9,7 +9,7 @@ import { TrendingUp, DollarSign, Package, Target, Zap, X, RefreshCw, Filter } fr
 
 export const Opportunities: React.FC = () => {
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState(300000); // 5 min default
+  const [refreshInterval] = useState(300000); // 5 min default
 
   // Filters
   const [minMargin, setMinMargin] = useState(15);

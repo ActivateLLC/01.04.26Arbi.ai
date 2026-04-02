@@ -12,9 +12,9 @@ export const RevenueChart: React.FC<RevenueChartProps> = React.memo(({ data, err
   // Error state
   if (error) {
     return (
-      <div className="w-full h-full min-h-[200px] flex items-center justify-center">
+      <div className="w-full h-full min-h-[200px] flex items-center justify-center" role="alert" aria-live="polite">
         <div className="text-center">
-          <AlertTriangle size={32} className="text-red-400 mb-2 mx-auto" />
+          <AlertTriangle size={32} className="text-red-400 mb-2 mx-auto" aria-hidden="true" />
           <p className="text-sm text-red-400">Failed to load chart</p>
         </div>
       </div>
@@ -24,15 +24,25 @@ export const RevenueChart: React.FC<RevenueChartProps> = React.memo(({ data, err
   // Empty state
   if (!data || data.length === 0) {
     return (
-      <div className="w-full h-full min-h-[200px] flex items-center justify-center">
+      <div className="w-full h-full min-h-[200px] flex items-center justify-center" role="status" aria-live="polite">
         <p className="text-sm text-slate-500">No data available</p>
       </div>
     );
   }
 
+  // Calculate summary for screen readers
+  const latestData = data[data.length - 1];
+  const chartSummary = latestData
+    ? `Revenue chart showing latest profit of $${latestData.profit.toFixed(2)} and spend of $${latestData.spend.toFixed(2)} at ${latestData.time}`
+    : 'Revenue chart with no data';
+
   return (
     <div className="w-full h-full min-h-[200px]">
-      <ResponsiveContainer width="100%" height="100%">
+      {/* Screen reader accessible description */}
+      <div className="sr-only" role="img" aria-label={chartSummary}>
+        {chartSummary}
+      </div>
+      <ResponsiveContainer width="100%" height="100%" aria-hidden="true">
         <AreaChart
           data={data}
           margin={{
