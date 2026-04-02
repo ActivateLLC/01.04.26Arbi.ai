@@ -30,7 +30,7 @@ describe('ControlPanel', () => {
 
       expect(screen.getByText(/Turn It On/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/daily spend limit/i)).toBeInTheDocument();
-      expect(screen.getByText(/Risk Tolerance/i)).toBeInTheDocument();
+      expect(screen.getByRole('slider')).toBeInTheDocument();
     });
 
     it('should display current daily spend value', () => {

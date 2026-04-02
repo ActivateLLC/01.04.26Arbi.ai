@@ -3,5 +3,5 @@
  */
 
 export { useAppStore, useAppState } from './appStore';
-export { useOpportunitiesStore, useOpportunities } from './opportunitiesStore';
+export { useOpportunitiesUIStore, useOpportunitiesUI } from './opportunitiesStore';
 export { useMarketplaceStore, useMarketplace } from './marketplaceStore';

@@ -35,7 +35,6 @@ const reportMetric = (metric: Metric) => {
 export const reportWebVitals = () => {
   // Core Web Vitals
   onCLS(reportMetric); // Cumulative Layout Shift
-  onFID(reportMetric); // First Input Delay (deprecated, but still measured)
   onFCP(reportMetric); // First Contentful Paint
   onLCP(reportMetric); // Largest Contentful Paint
   onTTFB(reportMetric); // Time to First Byte

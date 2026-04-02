@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
     build: {
       // Build optimization settings
       target: 'es2020',
-      minify: isProd ? 'terser' : false,
+      minify: isProd ? 'esbuild' : false,
       sourcemap: isProd ? false : true,
       rollupOptions: {
         output: {
@@ -56,13 +56,6 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: true,
       // Optimize dependencies
       reportCompressedSize: isProd,
-      // Terser options for production
-      terserOptions: isProd ? {
-        compress: {
-          drop_console: true,
-          drop_debugger: true,
-        },
-      } : undefined,
     },
     // Optimize deps
     optimizeDeps: {

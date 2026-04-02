@@ -114,16 +114,16 @@ export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = React.memo(
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">AI Does</h2>
-        <div className="flex items-center gap-2">
-           <span className={`w-2 h-2 rounded-full ${isSystemActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-700'}`}></span>
+    <section className="space-y-4" aria-labelledby="pipeline-heading">
+      <header className="flex items-center justify-between">
+        <h2 id="pipeline-heading" className="text-xl font-bold text-white">AI Does</h2>
+        <div className="flex items-center gap-2" role="status" aria-live="polite">
+           <span className={`w-2 h-2 rounded-full ${isSystemActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-700'}`} aria-hidden="true"></span>
            <span className="text-xs text-slate-400 font-mono">{isSystemActive ? 'INFINITE PARALLEL OPS' : 'OFFLINE'}</span>
         </div>
-      </div>
-      
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      </header>
+
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4" role="region" aria-label="AI pipeline stages">
         {stages.map((stage) => (
           <StageCard
             key={stage.id}
@@ -137,6 +137,6 @@ export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = React.memo(
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 });

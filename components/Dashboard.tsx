@@ -125,8 +125,8 @@ export const Dashboard: React.FC = () => {
             </div>
             <div className="text-xs font-mono text-slate-500 uppercase" aria-hidden="true">Revenue</div>
           </div>
-          <div className="text-4xl font-bold text-white font-mono mb-1" aria-label={`${(stats?.potentialRevenue || 0).toLocaleString()} dollars potential revenue`}>
-            ${(stats?.potentialRevenue || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          <div className="text-4xl font-bold text-white font-mono mb-1" aria-label={`${(stats?.totalPotentialRevenue || 0).toLocaleString()} dollars potential revenue`}>
+            ${(stats?.totalPotentialRevenue || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </div>
           <div className="text-sm text-slate-400">Potential Revenue</div>
         </article>
@@ -166,6 +166,6 @@ export const Dashboard: React.FC = () => {
           Last updated: {stats.lastUpdated}
         </div>
       )}
-    </div>
+    </section>
   );
 };
