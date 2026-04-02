@@ -53,7 +53,7 @@ const StageCard: React.FC<{
   );
 };
 
-export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({ status, activeStage }) => {
+export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = React.memo(({ status, activeStage }) => {
   const isSystemActive = status === SystemStatus.ACTIVE;
 
   const stages = [
@@ -133,4 +133,4 @@ export const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({ status, 
       </div>
     </div>
   );
-};
+});

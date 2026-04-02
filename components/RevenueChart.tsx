@@ -6,7 +6,7 @@ interface RevenueChartProps {
   data: ChartDataPoint[];
 }
 
-export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
+export const RevenueChart: React.FC<RevenueChartProps> = React.memo(({ data }) => {
   return (
     <div className="w-full h-full min-h-[200px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -65,4 +65,4 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
       </ResponsiveContainer>
     </div>
   );
-};
+});

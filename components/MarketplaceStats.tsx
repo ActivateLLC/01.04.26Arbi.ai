@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getMarketplaceStats, MarketplaceStats as Stats } from '../services/arbiService';
 import { Package, TrendingUp, DollarSign, Percent } from 'lucide-react';
 
-export const MarketplaceStats: React.FC = () => {
+export const MarketplaceStats: React.FC = React.memo(() => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -96,9 +96,10 @@ export const MarketplaceStats: React.FC = () => {
                 </div>
                 
                 {product.productImages && product.productImages.length > 0 ? (
-                  <img 
-                    src={product.productImages[0]} 
+                  <img
+                    src={product.productImages[0]}
                     alt={product.productTitle}
+                    loading="lazy"
                     className="w-12 h-12 rounded-lg object-cover border border-white/10"
                   />
                 ) : (

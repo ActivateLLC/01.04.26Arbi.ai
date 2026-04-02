@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { ArbitrageOpportunity } from '../types';
 import { getArbitrageOpportunities, autoListOpportunity } from '../services/arbiService';
 import { TrendingUp, DollarSign, Package, Target, Zap, X, RefreshCw, Filter } from 'lucide-react';
@@ -274,7 +274,7 @@ const OpportunityCard: React.FC<{
   onDismiss: (id: string) => void;
   getScoreColor: (score?: number) => string;
   getMarginColor: (margin: number) => string;
-}> = ({ opportunity, isProcessing, onAutoList, onDismiss, getScoreColor, getMarginColor }) => {
+}> = React.memo(({ opportunity, isProcessing, onAutoList, onDismiss, getScoreColor, getMarginColor }) => {
   return (
     <div className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 hover:border-emerald-500/30 transition-all group">
       {/* Header */}
@@ -374,4 +374,4 @@ const OpportunityCard: React.FC<{
       </div>
     </div>
   );
-};
+});

@@ -22,24 +22,31 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   const isActive = status === SystemStatus.ACTIVE;
 
   return (
-    <div className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 flex flex-col gap-6 shadow-xl">
+    <section
+      className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 flex flex-col gap-6 shadow-xl"
+      aria-labelledby="control-panel-heading"
+    >
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/20 text-xs text-indigo-400 font-mono border border-indigo-500/30">1</span>
+          <h2 id="control-panel-heading" className="text-xl font-bold text-white flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-500/20 text-xs text-indigo-400 font-mono border border-indigo-500/30" aria-hidden="true">1</span>
             Turn It On
           </h2>
           <p className="text-slate-400 text-sm mt-1">Activate the neural core.</p>
         </div>
         <button
           onClick={onToggleStatus}
-          className={`relative group px-8 py-3 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 ${
-            isActive 
-              ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.2)]' 
-              : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)]'
+          aria-label={isActive ? 'Deactivate arbitrage system' : 'Activate arbitrage system'}
+          aria-pressed={isActive}
+          className={`relative group px-8 py-3 rounded-xl font-bold transition-all duration-300 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+            isActive
+              ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.2)] focus:ring-red-500'
+              : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)] focus:ring-emerald-500'
           }`}
         >
-          {isActive ? <Pause size={18} /> : <Play size={18} fill="currentColor" />}
+          <span aria-hidden="true">
+            {isActive ? <Pause size={18} /> : <Play size={18} fill="currentColor" />}
+          </span>
           {isActive ? 'DEACTIVATE' : 'ACTIVATE'}
         </button>
       </div>
@@ -48,23 +55,29 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* Daily Limit */}
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] text-indigo-400 font-mono border border-indigo-500/30">2</span>
+            <label htmlFor="daily-spend-input" className="text-sm font-medium text-slate-300 flex items-center gap-2">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500/20 text-[10px] text-indigo-400 font-mono border border-indigo-500/30" aria-hidden="true">2</span>
               Daily Spend Limit
             </label>
-            <span className="font-mono text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded text-sm border border-emerald-900">
+            <span className="font-mono text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded text-sm border border-emerald-900" aria-live="polite">
               ${dailySpend.toLocaleString()}
             </span>
           </div>
           <div className="relative h-12 bg-slate-950 rounded-lg border border-white/10 flex items-center px-4 group focus-within:border-emerald-500/50 transition-colors">
-            <DollarSign size={16} className="text-slate-500 mr-2 group-focus-within:text-emerald-500" />
+            <DollarSign size={16} className="text-slate-500 mr-2 group-focus-within:text-emerald-500" aria-hidden="true" />
             <input
+              id="daily-spend-input"
               type="number"
               value={dailySpend}
               onChange={(e) => setDailySpend(Number(e.target.value))}
               disabled={isActive}
-              className="bg-transparent w-full outline-none text-white font-mono disabled:opacity-50"
+              aria-label="Daily spend limit in dollars"
+              aria-describedby="daily-spend-description"
+              className="bg-transparent w-full outline-none text-white font-mono disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded"
             />
+            <span id="daily-spend-description" className="sr-only">
+              Set your daily spending limit. Cannot be changed while system is active.
+            </span>
           </div>
         </div>
 

@@ -1,14 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { ControlPanel } from './components/ControlPanel';
 import { PipelineVisualizer } from './components/PipelineVisualizer';
 import { TerminalLog } from './components/TerminalLog';
 import { RevenueChart } from './components/RevenueChart';
 import { Dashboard } from './components/Dashboard';
-import { MarketplaceStats } from './components/MarketplaceStats';
-import { Opportunities } from './components/Opportunities';
+import { VisuallyHidden } from './components/VisuallyHidden';
+
+// Lazy load heavy components for code splitting
+const MarketplaceStats = lazy(() => import('./components/MarketplaceStats').then(module => ({ default: module.MarketplaceStats })));
+const Opportunities = lazy(() => import('./components/Opportunities').then(module => ({ default: module.Opportunities })));
 import { SystemStatus, LogEntry, ChartDataPoint, PipelineStage } from './types';
 import { generateSystemLogs } from './services/geminiService';
-import { LayoutGrid, Settings, Wallet, Bell, Menu, Package, Search } from 'lucide-react';
+import { LayoutGrid, Settings, Wallet, Bell, Menu, Package, Search, RefreshCw } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const App: React.FC = () => {
@@ -104,9 +108,43 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex text-slate-200 selection:bg-emerald-500/30">
-      
+      {/* Skip to main content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-emerald-500 focus:text-white focus:rounded-lg focus:shadow-lg"
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          top: 'auto',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden',
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.position = 'fixed';
+          e.currentTarget.style.left = '1rem';
+          e.currentTarget.style.top = '1rem';
+          e.currentTarget.style.width = 'auto';
+          e.currentTarget.style.height = 'auto';
+          e.currentTarget.style.overflow = 'visible';
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.position = 'absolute';
+          e.currentTarget.style.left = '-9999px';
+          e.currentTarget.style.top = 'auto';
+          e.currentTarget.style.width = '1px';
+          e.currentTarget.style.height = '1px';
+          e.currentTarget.style.overflow = 'hidden';
+        }}
+      >
+        Skip to main content
+      </a>
+
       {/* Sidebar (Desktop) */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-white/5 bg-slate-950/50 backdrop-blur-xl fixed h-full z-20">
+      <aside
+        className="hidden lg:flex w-64 flex-col border-r border-white/5 bg-slate-950/50 backdrop-blur-xl fixed h-full z-20"
+        aria-label="Main navigation"
+      >
         <div className="p-6 border-b border-white/5">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-cyan-500/20">A</div>
@@ -139,20 +177,32 @@ const App: React.FC = () => {
         </nav>
 
         <div className="p-4 border-t border-white/5">
-          <div className="bg-slate-900 rounded-xl p-4">
+          <div className="bg-slate-900 rounded-xl p-4" role="region" aria-label="Profit summary">
              <div className="text-xs text-slate-500 mb-1">Total Profit Balance</div>
-             <div className="text-2xl font-mono text-emerald-400 font-bold">${totalProfit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+             <div className="text-2xl font-mono text-emerald-400 font-bold" aria-live="polite">
+               ${totalProfit.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+             </div>
              <div className="text-[10px] text-emerald-600 mt-1 flex items-center gap-1">
-               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-               Live Updates
+               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></span>
+               <span aria-live="polite">Live Updates</span>
              </div>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 lg:ml-64 p-4 md:p-8 overflow-x-hidden">
-        
+      <main
+        id="main-content"
+        className="flex-1 lg:ml-64 p-4 md:p-8 overflow-x-hidden"
+        role="main"
+        aria-label="Main content"
+      >
+        {/* Loading status announcer for screen readers */}
+        <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          {status === SystemStatus.ACTIVE && 'Arbitrage system is active and running'}
+          {status === SystemStatus.IDLE && 'Arbitrage system is idle'}
+        </div>
+
         {/* Header (Mobile) */}
         <header className="lg:hidden flex justify-between items-center mb-6">
            <div className="flex items-center gap-2 text-white font-bold text-lg">
@@ -163,7 +213,12 @@ const App: React.FC = () => {
              />
              Arbi.ai
           </div>
-          <Menu className="text-slate-400" />
+          <button
+            aria-label="Open navigation menu"
+            className="text-slate-400 hover:text-slate-200 p-2 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <Menu aria-hidden="true" />
+          </button>
         </header>
 
         {activeTab === 'simulation' ? (
@@ -181,11 +236,16 @@ const App: React.FC = () => {
              />
           </div>
           
-          <div className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+          <div
+            className="bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-2xl p-6 flex flex-col justify-between shadow-xl"
+            role="region"
+            aria-label="Return on ad spend statistics"
+          >
              <div className="flex justify-between items-start">
                <div>
                  <h3 className="text-slate-400 text-sm font-medium">Real-time ROAS</h3>
-                 <div className="text-3xl font-bold text-white mt-1 font-mono">
+                 <div className="text-3xl font-bold text-white mt-1 font-mono" aria-live="polite">
+                   <VisuallyHidden>Return on ad spend: </VisuallyHidden>
                    {status === SystemStatus.ACTIVE ? roi.toFixed(1) : '0.0'}%
                  </div>
                </div>
@@ -193,11 +253,11 @@ const App: React.FC = () => {
                  TARGET: 300%
                </div>
              </div>
-             
-             <div className="h-40 mt-4">
+
+             <div className="h-40 mt-4" role="img" aria-label="Revenue and profit chart showing real-time performance">
                <RevenueChart data={chartData} />
              </div>
-             
+
              <div className="text-center mt-2 text-[10px] text-slate-500 uppercase tracking-widest">
                Output: Pure Profit
              </div>
@@ -215,20 +275,31 @@ const App: React.FC = () => {
         </div>
           </>
         ) : activeTab === 'opportunities' ? (
-          <>
-            {/* Opportunities Tab */}
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <RefreshCw size={48} className="text-emerald-500 animate-spin mb-4 mx-auto" />
+                <p className="text-slate-400">Loading opportunities...</p>
+              </div>
+            </div>
+          }>
             <Opportunities />
-          </>
+          </Suspense>
         ) : (
-          <>
-            {/* Real Marketplace Data */}
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <RefreshCw size={48} className="text-emerald-500 animate-spin mb-4 mx-auto" />
+                <p className="text-slate-400">Loading marketplace data...</p>
+              </div>
+            </div>
+          }>
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-white mb-2">Live Marketplace</h1>
               <p className="text-slate-400">Real-time data from your Arbi marketplace</p>
             </div>
-
             <MarketplaceStats />
-          </>
+          </Suspense>
         )}
 
       </main>
@@ -237,26 +308,28 @@ const App: React.FC = () => {
 };
 
 // Simple Nav Helper
-const NavItem: React.FC<{ 
-  icon: React.ReactNode, 
-  label: string, 
-  active?: boolean, 
+const NavItem: React.FC<{
+  icon: React.ReactNode,
+  label: string,
+  active?: boolean,
   count?: number,
-  onClick?: () => void 
+  onClick?: () => void
 }> = ({ icon, label, active, count, onClick }) => (
-  <button 
+  <button
     onClick={onClick}
-    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
-    active 
-      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+    aria-label={`${label}${count ? `, ${count} new items` : ''}`}
+    aria-current={active ? 'page' : undefined}
+    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-slate-950 ${
+    active
+      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
       : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
   }`}>
     <div className="flex items-center gap-3">
-      {icon}
+      <span aria-hidden="true">{icon}</span>
       <span className="font-medium text-sm">{label}</span>
     </div>
     {count && (
-      <span className="bg-emerald-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+      <span className="bg-emerald-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full" aria-label={`${count} notifications`}>
         {count}
       </span>
     )}
