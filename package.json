@@ -59,7 +59,7 @@
     "eslint": "^9.20.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
-    "globals": "^15.17.0",
+    "globals": "^15.15.0",
     "jsdom": "^26.0.0",
     "playwright": "^1.59.1",
     "typescript": "~5.8.2",
